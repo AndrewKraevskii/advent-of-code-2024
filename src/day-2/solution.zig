@@ -36,33 +36,31 @@ pub fn solution1(_: std.mem.Allocator, text: []const u8) !u64 {
     return number_of_valid_lines;
 }
 
-pub fn lineValid(line: []const u8, skip: ?usize) ?usize {
-    var token_iter = std.mem.tokenizeAny(u8, line, &std.ascii.whitespace);
+pub fn lineValid(line: []u8, skip: ?usize) ?usize {
     var i: usize = 0;
     if (skip == 0) {
-        _ = token_iter.next();
         i += 1;
     }
 
-    var prev_prev: u8 = parseSimple(token_iter.next() orelse unreachable);
+    var prev_prev: u8 = line[i];
     i += 1;
     if (skip == 1) {
-        _ = token_iter.next();
         i += 1;
     }
 
-    var prev: u8 = parseSimple(token_iter.next() orelse unreachable);
+    var prev: u8 = line[i];
     i += 1;
     if (!numbersDistanceIs3(prev_prev, prev)) return 1;
     const prev_increasing: bool = prev > prev_prev;
 
-    while (token_iter.next()) |token| : (i += 1) {
+    while (i < line.len) : (i += 1) {
         if (i == skip) continue;
-        const num = parseSimple(token);
+        const num = line[i];
         const sign = num > prev;
         if (sign != prev_increasing or
             !numbersDistanceIs3(num, prev))
         {
+            i -= 1;
             return i;
         }
 
@@ -77,12 +75,13 @@ pub fn solution2(_: std.mem.Allocator, text: []const u8) !u64 {
     var number_of_valid_lines: u64 = 0;
     var line_iter = std.mem.tokenizeScalar(u8, text, '\n');
     while (line_iter.next()) |line| {
-        _ = lineValid(line, null) orelse {
-            number_of_valid_lines += 1;
-            continue;
-        };
-        for (0..8) |i| {
-            const a = lineValid(line, i);
+        var token_iter = std.mem.tokenizeAny(u8, line, &std.ascii.whitespace);
+        var bounded_array: std.BoundedArray(u8, 8) = .{};
+        while (token_iter.next()) |token| {
+            bounded_array.appendAssumeCapacity(parseSimple(token));
+        }
+        for (0..4) |i| {
+            const a = lineValid(bounded_array.slice(), i);
             if (a == null) break;
         } else continue;
         number_of_valid_lines += 1;
