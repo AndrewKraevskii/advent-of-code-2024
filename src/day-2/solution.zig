@@ -75,12 +75,16 @@ pub fn solution2(_: std.mem.Allocator, text: []const u8) !u64 {
     var number_of_valid_lines: u64 = 0;
     var line_iter = std.mem.tokenizeScalar(u8, text, '\n');
     while (line_iter.next()) |line| {
-        var token_iter = std.mem.tokenizeAny(u8, line, &std.ascii.whitespace);
+        var token_iter = std.mem.tokenizeScalar(u8, line, ' ');
         var bounded_array: std.BoundedArray(u8, 8) = .{};
         while (token_iter.next()) |token| {
             bounded_array.appendAssumeCapacity(parseSimple(token));
         }
-        for (0..4) |i| {
+        const start = lineValid(bounded_array.slice(), null) orelse {
+            number_of_valid_lines += 1;
+            continue;
+        };
+        for (@max(0, start - 1)..start + 2) |i| {
             const a = lineValid(bounded_array.slice(), i);
             if (a == null) break;
         } else continue;
