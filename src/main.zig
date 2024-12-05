@@ -5,7 +5,6 @@ const day = config.day;
 
 pub fn main() !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-
     const dir_name = std.fmt.comptimePrint("day-{d}", .{day});
     const input_path = dir_name ++ .{std.fs.path.sep} ++ "input.txt";
     const test_path = dir_name ++ .{std.fs.path.sep} ++ "test.txt";
