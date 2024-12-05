@@ -9,20 +9,25 @@ pub const Entry = extern struct {
     }
 };
 
+pub fn parseNum(num: [4]u8) u16 {
+    return (@as(u16, (num[0] - '0')) * 10 +
+        num[1] - '0') * 100 +
+        (num[2] - '0') * 10 +
+        num[3] - '0';
+}
+
 pub fn solution1(alloc: std.mem.Allocator, text: []const u8) !u64 {
     const end = (std.mem.indexOf(u8, text, "\n\n") orelse return error.MalformedInput) + 1;
     const mapping = mapping: {
+        const bools = try alloc.alloc(bool, 100 * 100);
         const mapping = std.mem.bytesAsSlice([2]Entry, text[0..end]);
 
-        const packed_mapping = try alloc.alloc(u32, mapping.len);
-        for (packed_mapping, mapping) |*p, m| {
-            p.* = @bitCast(m[0].num ++ m[1].num);
+        @memset(bools, false);
+        for (mapping) |entry| {
+            const num = parseNum(entry[0].num ++ entry[1].num);
+            bools[num] = true;
         }
-        break :mapping try std.AutoArrayHashMapUnmanaged(u32, void).init(
-            alloc,
-            packed_mapping,
-            undefined,
-        );
+        break :mapping bools;
     };
     var counter: u64 = 0;
     var pos = end + 1;
@@ -33,8 +38,8 @@ pub fn solution1(alloc: std.mem.Allocator, text: []const u8) !u64 {
         const list = std.mem.bytesAsSlice(Entry, text[pos .. end_of_line + 1]);
         for (list[0 .. list.len - 1], 1..) |first, index| {
             for (list[index..]) |second| {
-                const entry: u32 = @bitCast(second.num ++ first.num);
-                if (mapping.contains(entry)) {
+                const entry: u32 = parseNum(second.num ++ first.num);
+                if (mapping[entry]) {
                     continue :outer;
                 }
             }
