@@ -1,16 +1,20 @@
 const std = @import("std");
 
-fn startsWithStride(slice: []const u8, needle: []const u8, start: usize, stride: isize) bool {
+fn startsWithStride(slice: []const u8, comptime needle: []const u8, start: usize, stride: isize) bool {
     var index: usize = 0;
     var pos: isize = @intCast(start);
 
+    const Vec = @Vector(needle.len, u8);
+    var vec: Vec = undefined;
+    const needle_vec = @as(Vec, needle[0..needle.len].*);
+
     while (true) : ({
         index += 1;
-        if (index >= needle.len) return true;
+        if (index >= needle.len) return @reduce(.And, needle_vec == vec);
         pos += stride;
         if (pos < 0 or pos >= slice.len) return false;
     }) {
-        if (needle[index] != slice[@intCast(pos)]) return false;
+        vec[index] = slice[@intCast(pos)];
     }
 }
 
@@ -29,7 +33,6 @@ pub fn solution1(_: std.mem.Allocator, text: []const u8) !u64 {
         -@as(isize, @intCast(stride - 1)),
     };
     var counter: u64 = 0;
-    // we iterate start first to make it cache friendly (gives 2x speed win)
     for (0..text.len) |start| {
         for (strides) |s| {
             if (startsWithStride(text, "XMAS", start, s))
