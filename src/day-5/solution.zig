@@ -16,13 +16,12 @@ pub fn parseNum(num: [4]u8) u16 {
         num[3] - '0';
 }
 
-pub fn solution1(alloc: std.mem.Allocator, text: []const u8) !u64 {
+pub fn solution1(_: std.mem.Allocator, text: []const u8) !u64 {
     const end = (std.mem.indexOf(u8, text, "\n\n") orelse return error.MalformedInput) + 1;
     const mapping = mapping: {
-        const bools = try alloc.alloc(bool, 100 * 100);
+        var bools: [100 * 100]bool = @splat(false);
         const mapping = std.mem.bytesAsSlice([2]Entry, text[0..end]);
 
-        @memset(bools, false);
         for (mapping) |entry| {
             const num = parseNum(entry[0].num ++ entry[1].num);
             bools[num] = true;
