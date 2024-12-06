@@ -11,12 +11,13 @@ pub fn main() !void {
     const test_answer_part1 = dir_name ++ .{std.fs.path.sep} ++ "1-test-answer.txt";
     const test_answer_part2 = dir_name ++ .{std.fs.path.sep} ++ "2-test-answer.txt";
     const test_answer_path = if (config.part == .@"1") test_answer_part1 else test_answer_part2;
-    const input = @embedFile(if (config.is_test) test_path else input_path);
+    const input = @embedFile(if (config.is_test) test_path else input_path).*;
 
     if (config.benchmark) {
         const times_to_run = times_to_run: {
             var timer = try std.time.Timer.start();
-            const res = try solution(arena.allocator(), input);
+            var input_copy = input;
+            const res = try solution(arena.allocator(), &input_copy);
             _ = res; // autofix
             const diff = timer.read();
             const seconds_to_benchmark = 3;
@@ -33,7 +34,8 @@ pub fn main() !void {
         var timer = try std.time.Timer.start();
         for (0..times_to_run) |_| {
             _ = arena.reset(.retain_capacity);
-            _ = try solution(arena.allocator(), input);
+            var input_copy = input;
+            _ = try solution(arena.allocator(), &input_copy);
             node.completeOne();
         }
         const time = timer.read();
@@ -44,7 +46,8 @@ pub fn main() !void {
         , .{ times_to_run, std.fmt.fmtDuration(time / times_to_run) });
     }
 
-    const res = try solution(arena.allocator(), input);
+    var input_copy = input;
+    const res = try solution(arena.allocator(), &input_copy);
     if (config.is_test) {
         const expected = std.fmt.parseInt(u64, std.mem.trim(
             u8,
