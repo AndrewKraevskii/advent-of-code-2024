@@ -23,15 +23,14 @@ pub fn solution1(_: std.mem.Allocator, text: []u8) !u64 {
             if (position < 0 or position >= text.len) break :outer;
         }) {
             const char = &text[@intCast(position)];
-            if (char.* == '\n') break :outer;
             if (char.* == '#') {
                 position -= direction;
                 break;
             }
+            if (char.* == '\n') break :outer;
             if (char.* != 'X') {
-                char.* = 'X';
                 counter += 1;
-                continue;
+                char.* = 'X';
             }
         }
     }
