@@ -79,10 +79,15 @@ pub fn solution1(_: std.mem.Allocator, text: []const u8) !u64 {
     var iter = Tokenizer{ .buffer = text };
     var sum: u64 = 0;
     while (true) {
+        // "mul("
         if (iter.next() orelse break != .@"mul(") continue;
+        // "mul(239"
         const first = (iter.next() orelse break).digit() orelse continue;
+        // "mul(239,"
         if (iter.next() orelse break != .@",") continue;
+        // "mul(239,30"
         const second = (iter.next() orelse break).digit() orelse continue;
+        // "mul(239,30)"
         if (iter.next() orelse break != .@")") continue;
 
         sum += first * second;
