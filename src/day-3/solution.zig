@@ -25,15 +25,18 @@ pub const Tokenizer = struct {
 
     pub fn next(self: *Tokenizer) ?Token {
         if (self.buffer.len == self.pos) return null;
-        a: switch (self.buffer[self.pos]) {
+
+        label: switch (self.buffer[self.pos]) {
             'm' => {
                 if (std.mem.startsWith(u8, self.buffer[self.pos..], @tagName(Token.@"mul("))) {
                     self.pos += @tagName(Token.@"mul(").len;
                     return .@"mul(";
                 }
+
                 self.pos += 1;
+
                 if (self.buffer.len == self.pos) return null;
-                continue :a self.buffer[self.pos];
+                continue :label self.buffer[self.pos];
             },
             'd' => {
                 inline for (.{ Token.@"do()", Token.@"don't()" }) |token| {
@@ -42,9 +45,11 @@ pub const Tokenizer = struct {
                         return token;
                     }
                 }
+
                 self.pos += 1;
+
                 if (self.buffer.len == self.pos) return null;
-                continue :a self.buffer[self.pos];
+                continue :label self.buffer[self.pos];
             },
             ',' => {
                 self.pos += 1;
